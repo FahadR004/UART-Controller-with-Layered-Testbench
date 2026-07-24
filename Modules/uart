@@ -1,0 +1,399 @@
+//==============================================================================
+// UART (Universal Asynchronous Receiver/Transmitter)
+// Parameterized: clock frequency, baud rate, data bits, parity, stop bits
+// Oversampling ratio: 16x baud rate for the receiver
+//==============================================================================
+
+//------------------------------------------------------------------------------
+// Shared package: single source of truth for parity calculation, used by
+// both TX (to generate the parity bit) and RX (to check the received one).
+//------------------------------------------------------------------------------
+package uart_pkg;
+
+    // width: number of valid data bits in `data` (i.e. DATA_BITS)
+    // parity_mode: "NONE", "EVEN", or "ODD"
+    function automatic logic calc_parity(
+        input logic [31:0] data,
+        input int          width,
+        input string       parity_mode
+    );
+        logic [31:0] mask;
+        logic [31:0] masked_data;
+        logic        p;
+
+        // Build a `width`-bit mask at runtime (part-selects can't use a
+        // variable width, even with +:/-: operators, so we mask instead).
+        mask        = (32'd1 << width) - 32'd1;
+        masked_data = data & mask;
+
+        unique case (parity_mode)
+            "EVEN":   p = ^masked_data;
+            "ODD":    p = ~(^masked_data);
+            default:  p = 1'b0; // "NONE" - unused, defined tie-off value
+        endcase
+        return p;
+    endfunction
+
+endpackage
+
+//------------------------------------------------------------------------------
+// Baud Rate Generator
+// Produces a single-cycle-wide tick at 16x the configured baud rate.
+//------------------------------------------------------------------------------
+module uart_baud_gen #(
+    parameter int CLK_FREQ_HZ = 50_000_000,
+    parameter int BAUD_RATE   = 115_200
+) (
+    input  logic clk,
+    input  logic rst_n,
+    output logic tick_x16   // pulses once per (1/(16*BAUD_RATE)) seconds
+);
+
+    localparam int DIVISOR = CLK_FREQ_HZ / (BAUD_RATE * 16);
+    // Sanity: DIVISOR should be >= 1. For 50MHz/115200 baud -> ~27.
+    logic [$clog2(DIVISOR):0] count;
+
+    always_ff @(posedge clk or negedge rst_n) begin
+        if (!rst_n) begin
+            count    <= '0;
+            tick_x16 <= 1'b0;
+        end else if (count == DIVISOR - 1) begin
+            count    <= '0;
+            tick_x16 <= 1'b1;
+        end else begin
+            count    <= count + 1'b1;
+            tick_x16 <= 1'b0;
+        end
+    end
+
+endmodule
+
+
+//------------------------------------------------------------------------------
+// UART Transmitter
+// Shifts out: start bit -> data bits (LSB first) -> optional parity -> stop bit(s)
+//------------------------------------------------------------------------------
+module uart_tx #(
+    parameter int    DATA_BITS = 8,
+    parameter string PARITY    = "NONE",   // "NONE", "EVEN", "ODD"
+    parameter int    STOP_BITS = 1         // 1 or 2
+) (
+    input  logic                  clk,
+    input  logic                  rst_n,
+    input  logic                  baud_tick_x16,   // 16x baud tick from generator
+    input  logic                  tx_start,        // pulse to begin a new frame
+    input  logic [DATA_BITS-1:0]  tx_data,
+    output logic                  tx_busy,
+    output logic                  tx_done,         // 1-cycle pulse when frame complete
+    output logic                  tx_serial
+);
+
+    import uart_pkg::calc_parity;
+
+    typedef enum logic [2:0] {
+        IDLE, START, DATA, PARITY_ST, STOP
+    } tx_state_e;
+
+    tx_state_e               state;
+    logic [3:0]              tick_cnt;     // counts 0..15 within a bit period
+    logic [$clog2(DATA_BITS)-1:0] bit_idx;
+    logic [DATA_BITS-1:0]    shift_reg;
+    logic                    parity_bit;
+    logic [1:0]              stop_cnt;
+
+    always_ff @(posedge clk or negedge rst_n) begin
+        if (!rst_n) begin
+            state      <= IDLE;
+            tick_cnt   <= '0;
+            bit_idx    <= '0;
+            shift_reg  <= '0;
+            parity_bit <= 1'b0;
+            stop_cnt   <= '0;
+            tx_serial  <= 1'b1;   // idle line is high
+            tx_busy    <= 1'b0;
+            tx_done    <= 1'b0;
+        end else begin
+            tx_done <= 1'b0; // default, pulsed only on completion
+
+            case (state)
+                IDLE: begin
+                    tx_serial <= 1'b1;
+                    tx_busy   <= 1'b0;
+                    if (tx_start) begin
+                        shift_reg  <= tx_data;
+                        parity_bit <= calc_parity(tx_data, DATA_BITS, PARITY);
+                        bit_idx    <= '0;
+                        tick_cnt   <= '0;
+                        stop_cnt   <= '0;
+                        tx_busy    <= 1'b1;
+                        state      <= START;
+                    end
+                end
+
+                START: begin
+                    tx_serial <= 1'b0; // start bit
+                    if (baud_tick_x16) begin
+                        if (tick_cnt == 4'd15) begin
+                            tick_cnt <= '0;
+                            state    <= DATA;
+                        end else
+                            tick_cnt <= tick_cnt + 1'b1;
+                    end
+                end
+
+                DATA: begin
+                    tx_serial <= shift_reg[0];
+                    if (baud_tick_x16) begin
+                        if (tick_cnt == 4'd15) begin
+                            tick_cnt  <= '0;
+                            shift_reg <= shift_reg >> 1;
+                            if (bit_idx == DATA_BITS - 1) begin
+                                bit_idx <= '0;
+                                state   <= (PARITY != "NONE") ? PARITY_ST : STOP;
+                            end else begin
+                                bit_idx <= bit_idx + 1'b1;
+                            end
+                        end else
+                            tick_cnt <= tick_cnt + 1'b1;
+                    end
+                end
+
+                PARITY_ST: begin
+                    tx_serial <= parity_bit;
+                    if (baud_tick_x16) begin
+                        if (tick_cnt == 4'd15) begin
+                            tick_cnt <= '0;
+                            state    <= STOP;
+                        end else
+                            tick_cnt <= tick_cnt + 1'b1;
+                    end
+                end
+
+                STOP: begin
+                    tx_serial <= 1'b1; // stop bit(s) are high
+                    if (baud_tick_x16) begin
+                        if (tick_cnt == 4'd15) begin
+                            tick_cnt <= '0;
+                            if (stop_cnt == STOP_BITS - 1) begin
+                                stop_cnt <= '0;
+                                tx_busy  <= 1'b0;
+                                tx_done  <= 1'b1;
+                                state    <= IDLE;
+                            end else begin
+                                stop_cnt <= stop_cnt + 1'b1;
+                            end
+                        end else
+                            tick_cnt <= tick_cnt + 1'b1;
+                    end
+                end
+
+                default: state <= IDLE;
+            endcase
+        end
+    end
+
+endmodule
+
+
+//------------------------------------------------------------------------------
+// UART Receiver
+// Oversamples the line at 16x baud rate, detects start edge, confirms it at
+// mid-bit, then samples each subsequent bit at its midpoint.
+//------------------------------------------------------------------------------
+module uart_rx #(
+    parameter int    DATA_BITS = 8,
+    parameter string PARITY    = "NONE",   // "NONE", "EVEN", "ODD"
+    parameter int    STOP_BITS = 1
+) (
+    input  logic                  clk,
+    input  logic                  rst_n,
+    input  logic                  baud_tick_x16,
+    input  logic                  rx_serial,
+    output logic [DATA_BITS-1:0]  rx_data,
+    output logic                  rx_valid,       // 1-cycle pulse: new byte ready
+    output logic                  rx_parity_err,  // valid on same cycle as rx_valid
+    output logic                  rx_frame_err    // stop bit not seen high
+);
+
+    import uart_pkg::calc_parity;
+
+    typedef enum logic [2:0] {
+        IDLE, START_CONFIRM, DATA, PARITY_ST, STOP
+    } rx_state_e;
+
+    rx_state_e                     state;
+    logic [3:0]                    tick_cnt;
+    logic [$clog2(DATA_BITS)-1:0]  bit_idx;
+    logic [DATA_BITS-1:0]          shift_reg;
+    logic                          rx_sync0, rx_sync1, rx_line; // 2-FF synchronizer
+    logic                          parity_calc;
+
+    // Synchronize the asynchronous serial input into our clock domain
+    always_ff @(posedge clk or negedge rst_n) begin
+        if (!rst_n) begin
+            rx_sync0 <= 1'b1;
+            rx_sync1 <= 1'b1;
+        end else begin
+            rx_sync0 <= rx_serial;
+            rx_sync1 <= rx_sync0;
+        end
+    end
+    assign rx_line = rx_sync1;
+
+    always_ff @(posedge clk or negedge rst_n) begin
+        if (!rst_n) begin
+            state         <= IDLE;
+            tick_cnt      <= '0;
+            bit_idx       <= '0;
+            shift_reg     <= '0;
+            rx_data       <= '0;
+            rx_valid      <= 1'b0;
+            rx_parity_err <= 1'b0;
+            rx_frame_err  <= 1'b0;
+        end else begin
+            rx_valid <= 1'b0; // default, pulsed only when a byte completes
+
+            case (state)
+                IDLE: begin
+                    tick_cnt <= '0;
+                    if (!rx_line) begin // falling edge -> possible start bit
+                        state <= START_CONFIRM;
+                    end
+                end
+
+                // Wait to the middle of the start bit (8 x16-ticks in) and
+                // re-check the line is still low, to reject glitches.
+                START_CONFIRM: begin
+                    if (baud_tick_x16) begin
+                        if (tick_cnt == 4'd7) begin
+                            if (!rx_line) begin
+                                tick_cnt <= '0;
+                                bit_idx  <= '0;
+                                state    <= DATA;
+                            end else begin
+                                state <= IDLE; // false start, back to idle
+                            end
+                        end else
+                            tick_cnt <= tick_cnt + 1'b1;
+                    end
+                end
+
+                DATA: begin
+                    if (baud_tick_x16) begin
+                        if (tick_cnt == 4'd15) begin
+                            tick_cnt  <= '0;
+                            shift_reg <= {rx_line, shift_reg[DATA_BITS-1:1]};
+                            if (bit_idx == DATA_BITS - 1) begin
+                                bit_idx <= '0;
+                                state   <= (PARITY != "NONE") ? PARITY_ST : STOP;
+                            end else begin
+                                bit_idx <= bit_idx + 1'b1;
+                            end
+                        end else
+                            tick_cnt <= tick_cnt + 1'b1;
+                    end
+                end
+
+                PARITY_ST: begin
+                    if (baud_tick_x16) begin
+                        if (tick_cnt == 4'd15) begin
+                            tick_cnt      <= '0;
+                            parity_calc    = calc_parity(shift_reg, DATA_BITS, PARITY);
+                            rx_parity_err <= (parity_calc != rx_line);
+                            state <= STOP;
+                        end else
+                            tick_cnt <= tick_cnt + 1'b1;
+                    end
+                end
+
+                STOP: begin
+                    if (baud_tick_x16) begin
+                        if (tick_cnt == 4'd15) begin
+                            tick_cnt     <= '0;
+                            rx_frame_err <= ~rx_line; // stop bit should be high
+                            rx_data      <= shift_reg;
+                            rx_valid     <= 1'b1;
+                            state        <= IDLE;
+                        end else
+                            tick_cnt <= tick_cnt + 1'b1;
+                    end
+                end
+
+                default: state <= IDLE;
+            endcase
+        end
+    end
+
+endmodule
+
+
+//------------------------------------------------------------------------------
+// Top-level UART: wraps baud generator + TX + RX
+//------------------------------------------------------------------------------
+module uart_top #(
+    parameter int    CLK_FREQ_HZ = 50_000_000,
+    parameter int    BAUD_RATE   = 115_200,
+    parameter int    DATA_BITS   = 8,
+    parameter string PARITY      = "NONE",
+    parameter int    STOP_BITS   = 1
+) (
+    input  logic                  clk,
+    input  logic                  rst_n,
+
+    // TX interface
+    input  logic                  tx_start,
+    input  logic [DATA_BITS-1:0]  tx_data,
+    output logic                  tx_busy,
+    output logic                  tx_done,
+    output logic                  tx_serial,
+
+    // RX interface
+    input  logic                  rx_serial,
+    output logic [DATA_BITS-1:0]  rx_data,
+    output logic                  rx_valid,
+    output logic                  rx_parity_err,
+    output logic                  rx_frame_err
+);
+
+    logic baud_tick_x16;
+
+    uart_baud_gen #(
+        .CLK_FREQ_HZ (CLK_FREQ_HZ),
+        .BAUD_RATE   (BAUD_RATE)
+    ) u_baud_gen (
+        .clk      (clk),
+        .rst_n    (rst_n),
+        .tick_x16 (baud_tick_x16)
+    );
+
+    uart_tx #(
+        .DATA_BITS (DATA_BITS),
+        .PARITY    (PARITY),
+        .STOP_BITS (STOP_BITS)
+    ) u_tx (
+        .clk           (clk),
+        .rst_n         (rst_n),
+        .baud_tick_x16 (baud_tick_x16),
+        .tx_start      (tx_start),
+        .tx_data       (tx_data),
+        .tx_busy       (tx_busy),
+        .tx_done       (tx_done),
+        .tx_serial     (tx_serial)
+    );
+
+    uart_rx #(
+        .DATA_BITS (DATA_BITS),
+        .PARITY    (PARITY),
+        .STOP_BITS (STOP_BITS)
+    ) u_rx (
+        .clk           (clk),
+        .rst_n         (rst_n),
+        .baud_tick_x16 (baud_tick_x16),
+        .rx_serial     (rx_serial),
+        .rx_data       (rx_data),
+        .rx_valid      (rx_valid),
+        .rx_parity_err (rx_parity_err),
+        .rx_frame_err  (rx_frame_err)
+    );
+
+endmodule

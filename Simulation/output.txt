@@ -1,0 +1,125 @@
+# [Driver] Reset finished
+# [50] [Generator] TXN : data=0x9c inject_parity_err=0 valid=0 parity_err_detected=0 frame_err_detected=0
+# [50] [Generator] TXN : data=0x16 inject_parity_err=0 valid=0 parity_err_detected=0 frame_err_detected=0
+# [50] [Generator] TXN : data=0xf8 inject_parity_err=0 valid=0 parity_err_detected=0 frame_err_detected=0
+# [50] [Generator] TXN : data=0xfc inject_parity_err=0 valid=0 parity_err_detected=0 frame_err_detected=0
+# [50] [Generator] TXN : data=0x90 inject_parity_err=0 valid=0 parity_err_detected=0 frame_err_detected=0
+# [50] [Generator] TXN : data=0x86 inject_parity_err=1 valid=0 parity_err_detected=0 frame_err_detected=0
+# [50] [Generator] TXN : data=0x4f inject_parity_err=0 valid=0 parity_err_detected=0 frame_err_detected=0
+# [50] [Generator] TXN : data=0x1e inject_parity_err=0 valid=0 parity_err_detected=0 frame_err_detected=0
+# [50] [Generator] TXN : data=0x9e inject_parity_err=0 valid=0 parity_err_detected=0 frame_err_detected=0
+# [50] [Generator] TXN : data=0x52 inject_parity_err=0 valid=0 parity_err_detected=0 frame_err_detected=0
+# [50] [Generator] TXN : data=0x99 inject_parity_err=0 valid=0 parity_err_detected=0 frame_err_detected=0
+# [50] [Generator] TXN : data=0xe1 inject_parity_err=0 valid=0 parity_err_detected=0 frame_err_detected=0
+# [50] [Generator] TXN : data=0x14 inject_parity_err=1 valid=0 parity_err_detected=0 frame_err_detected=0
+# [50] [Generator] TXN : data=0x48 inject_parity_err=0 valid=0 parity_err_detected=0 frame_err_detected=0
+# [50] [Generator] TXN : data=0xf5 inject_parity_err=0 valid=0 parity_err_detected=0 frame_err_detected=0
+# [50] [Generator] TXN : data=0x71 inject_parity_err=0 valid=0 parity_err_detected=0 frame_err_detected=0
+# [50] [Generator] TXN : data=0x7e inject_parity_err=0 valid=0 parity_err_detected=0 frame_err_detected=0
+# [50] [Generator] TXN : data=0x38 inject_parity_err=0 valid=0 parity_err_detected=0 frame_err_detected=0
+# [50] [Generator] TXN : data=0x18 inject_parity_err=0 valid=0 parity_err_detected=0 frame_err_detected=0
+# [50] [Generator] TXN : data=0xe1 inject_parity_err=0 valid=0 parity_err_detected=0 frame_err_detected=0
+# [82590] Monitor TX : data=0x9c inject_parity_err=0 valid=1 parity_err_detected=0 frame_err_detected=0
+# [90790] Monitor RX : data=0x9c inject_parity_err=0 valid=1 parity_err_detected=0 frame_err_detected=0
+# [Scoreboard][TX] PASS data=0x9c
+# [Scoreboard][RX] PASS data=0x9c inject_parity_err=0
+# [95530] Driver : data=0x9c inject_parity_err=0 valid=0 parity_err_detected=0 frame_err_detected=0
+# [178070] Monitor TX : data=0x16 inject_parity_err=0 valid=1 parity_err_detected=0 frame_err_detected=0
+# [185830] Monitor RX : data=0x16 inject_parity_err=0 valid=1 parity_err_detected=0 frame_err_detected=0
+# [Scoreboard][TX] PASS data=0x16
+# [Scoreboard][RX] PASS data=0x16 inject_parity_err=0
+# [191010] Driver : data=0x16 inject_parity_err=0 valid=0 parity_err_detected=0 frame_err_detected=0
+# [273550] Monitor TX : data=0xf8 inject_parity_err=0 valid=1 parity_err_detected=0 frame_err_detected=0
+# [281410] Monitor RX : data=0xf8 inject_parity_err=0 valid=1 parity_err_detected=0 frame_err_detected=0
+# [Scoreboard][TX] PASS data=0xf8
+# [Scoreboard][RX] PASS data=0xf8 inject_parity_err=0
+# [286490] Driver : data=0xf8 inject_parity_err=0 valid=0 parity_err_detected=0 frame_err_detected=0
+# [369030] Monitor TX : data=0xfc inject_parity_err=0 valid=1 parity_err_detected=0 frame_err_detected=0
+# [376990] Monitor RX : data=0xfc inject_parity_err=0 valid=1 parity_err_detected=0 frame_err_detected=0
+# [Scoreboard][TX] PASS data=0xfc
+# [Scoreboard][RX] PASS data=0xfc inject_parity_err=0
+# [381970] Driver : data=0xfc inject_parity_err=0 valid=0 parity_err_detected=0 frame_err_detected=0
+# [464510] Monitor TX : data=0x90 inject_parity_err=0 valid=1 parity_err_detected=0 frame_err_detected=0
+# [472570] Monitor RX : data=0x90 inject_parity_err=0 valid=1 parity_err_detected=0 frame_err_detected=0
+# [Scoreboard][TX] PASS data=0x90
+# [Scoreboard][RX] PASS data=0x90 inject_parity_err=0
+# [477450] Driver : data=0x90 inject_parity_err=0 valid=0 parity_err_detected=0 frame_err_detected=0
+# [559990] Monitor TX : data=0x86 inject_parity_err=0 valid=1 parity_err_detected=0 frame_err_detected=0
+# [568150] Monitor RX : data=0x86 inject_parity_err=0 valid=1 parity_err_detected=1 frame_err_detected=0
+# [Scoreboard][TX] PASS data=0x86
+# [Scoreboard][RX] PASS data=0x86 inject_parity_err=1
+# [572930] Driver : data=0x86 inject_parity_err=1 valid=0 parity_err_detected=0 frame_err_detected=0
+# [655470] Monitor TX : data=0x4f inject_parity_err=0 valid=1 parity_err_detected=0 frame_err_detected=0
+# [663730] Monitor RX : data=0x4f inject_parity_err=0 valid=1 parity_err_detected=0 frame_err_detected=0
+# [Scoreboard][TX] PASS data=0x4f
+# [Scoreboard][RX] PASS data=0x4f inject_parity_err=0
+# [668410] Driver : data=0x4f inject_parity_err=0 valid=0 parity_err_detected=0 frame_err_detected=0
+# [750950] Monitor TX : data=0x1e inject_parity_err=0 valid=1 parity_err_detected=0 frame_err_detected=0
+# [758770] Monitor RX : data=0x1e inject_parity_err=0 valid=1 parity_err_detected=0 frame_err_detected=0
+# [Scoreboard][TX] PASS data=0x1e
+# [Scoreboard][RX] PASS data=0x1e inject_parity_err=0
+# [763890] Driver : data=0x1e inject_parity_err=0 valid=0 parity_err_detected=0 frame_err_detected=0
+# [846430] Monitor TX : data=0x9e inject_parity_err=0 valid=1 parity_err_detected=0 frame_err_detected=0
+# [854350] Monitor RX : data=0x9e inject_parity_err=0 valid=1 parity_err_detected=0 frame_err_detected=0
+# [Scoreboard][TX] PASS data=0x9e
+# [Scoreboard][RX] PASS data=0x9e inject_parity_err=0
+# [859370] Driver : data=0x9e inject_parity_err=0 valid=0 parity_err_detected=0 frame_err_detected=0
+# [941910] Monitor TX : data=0x52 inject_parity_err=0 valid=1 parity_err_detected=0 frame_err_detected=0
+# [949930] Monitor RX : data=0x52 inject_parity_err=0 valid=1 parity_err_detected=0 frame_err_detected=0
+# [Scoreboard][TX] PASS data=0x52
+# [Scoreboard][RX] PASS data=0x52 inject_parity_err=0
+# [954850] Driver : data=0x52 inject_parity_err=0 valid=0 parity_err_detected=0 frame_err_detected=0
+# [1037390] Monitor TX : data=0x99 inject_parity_err=0 valid=1 parity_err_detected=0 frame_err_detected=0
+# [1045510] Monitor RX : data=0x99 inject_parity_err=0 valid=1 parity_err_detected=0 frame_err_detected=0
+# [Scoreboard][TX] PASS data=0x99
+# [Scoreboard][RX] PASS data=0x99 inject_parity_err=0
+# [1050330] Driver : data=0x99 inject_parity_err=0 valid=0 parity_err_detected=0 frame_err_detected=0
+# [1132870] Monitor TX : data=0xe1 inject_parity_err=0 valid=1 parity_err_detected=0 frame_err_detected=0
+# [1141090] Monitor RX : data=0xe1 inject_parity_err=0 valid=1 parity_err_detected=0 frame_err_detected=0
+# [Scoreboard][TX] PASS data=0xe1
+# [Scoreboard][RX] PASS data=0xe1 inject_parity_err=0
+# [1145810] Driver : data=0xe1 inject_parity_err=0 valid=0 parity_err_detected=0 frame_err_detected=0
+# [1228350] Monitor TX : data=0x14 inject_parity_err=0 valid=1 parity_err_detected=0 frame_err_detected=0
+# [1236130] Monitor RX : data=0x14 inject_parity_err=0 valid=1 parity_err_detected=1 frame_err_detected=0
+# [Scoreboard][TX] PASS data=0x14
+# [Scoreboard][RX] PASS data=0x14 inject_parity_err=1
+# [1241290] Driver : data=0x14 inject_parity_err=1 valid=0 parity_err_detected=0 frame_err_detected=0
+# [1323830] Monitor TX : data=0x48 inject_parity_err=0 valid=1 parity_err_detected=0 frame_err_detected=0
+# [1331710] Monitor RX : data=0x48 inject_parity_err=0 valid=1 parity_err_detected=0 frame_err_detected=0
+# [Scoreboard][TX] PASS data=0x48
+# [Scoreboard][RX] PASS data=0x48 inject_parity_err=0
+# [1336770] Driver : data=0x48 inject_parity_err=0 valid=0 parity_err_detected=0 frame_err_detected=0
+# [1419310] Monitor TX : data=0xf5 inject_parity_err=0 valid=1 parity_err_detected=0 frame_err_detected=0
+# [1427290] Monitor RX : data=0xf5 inject_parity_err=0 valid=1 parity_err_detected=0 frame_err_detected=0
+# [Scoreboard][TX] PASS data=0xf5
+# [Scoreboard][RX] PASS data=0xf5 inject_parity_err=0
+# [1432250] Driver : data=0xf5 inject_parity_err=0 valid=0 parity_err_detected=0 frame_err_detected=0
+# [1514790] Monitor TX : data=0x71 inject_parity_err=0 valid=1 parity_err_detected=0 frame_err_detected=0
+# [1522870] Monitor RX : data=0x71 inject_parity_err=0 valid=1 parity_err_detected=0 frame_err_detected=0
+# [Scoreboard][TX] PASS data=0x71
+# [Scoreboard][RX] PASS data=0x71 inject_parity_err=0
+# [1527730] Driver : data=0x71 inject_parity_err=0 valid=0 parity_err_detected=0 frame_err_detected=0
+# [1610270] Monitor TX : data=0x7e inject_parity_err=0 valid=1 parity_err_detected=0 frame_err_detected=0
+# [1618450] Monitor RX : data=0x7e inject_parity_err=0 valid=1 parity_err_detected=0 frame_err_detected=0
+# [Scoreboard][TX] PASS data=0x7e
+# [Scoreboard][RX] PASS data=0x7e inject_parity_err=0
+# [1623210] Driver : data=0x7e inject_parity_err=0 valid=0 parity_err_detected=0 frame_err_detected=0
+# [1705750] Monitor TX : data=0x38 inject_parity_err=0 valid=1 parity_err_detected=0 frame_err_detected=0
+# [1713490] Monitor RX : data=0x38 inject_parity_err=0 valid=1 parity_err_detected=0 frame_err_detected=0
+# [Scoreboard][TX] PASS data=0x38
+# [Scoreboard][RX] PASS data=0x38 inject_parity_err=0
+# [1718690] Driver : data=0x38 inject_parity_err=0 valid=0 parity_err_detected=0 frame_err_detected=0
+# [1801230] Monitor TX : data=0x18 inject_parity_err=0 valid=1 parity_err_detected=0 frame_err_detected=0
+# [1809070] Monitor RX : data=0x18 inject_parity_err=0 valid=1 parity_err_detected=0 frame_err_detected=0
+# [Scoreboard][TX] PASS data=0x18
+# [Scoreboard][RX] PASS data=0x18 inject_parity_err=0
+# [1814170] Driver : data=0x18 inject_parity_err=0 valid=0 parity_err_detected=0 frame_err_detected=0
+# [1896710] Monitor TX : data=0xe1 inject_parity_err=0 valid=1 parity_err_detected=0 frame_err_detected=0
+# [1904650] Monitor RX : data=0xe1 inject_parity_err=0 valid=1 parity_err_detected=0 frame_err_detected=0
+# [Scoreboard][TX] PASS data=0xe1
+# [Scoreboard][RX] PASS data=0xe1 inject_parity_err=0
+# --------------------------------------------------
+# [Scoreboard] TX: 20 passed, 0 failed
+# [Scoreboard] RX: 20 passed, 0 failed
+# --------------------------------------------------
+# [TB] Test complete
